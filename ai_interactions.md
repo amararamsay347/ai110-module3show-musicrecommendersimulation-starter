@@ -10,20 +10,19 @@
 
 **What task did you give the agent?**
 
-<!-- Describe the goal you asked the agent to accomplish -->
+I instructed Claude to add comeplex attributes to the dataset, including song popularity, release decade and detailed mood tags (3 for each song)
 
 **Prompts used:**
 
-<!-- Paste the key prompts you gave the agent -->
+Add the attributes of song popularity, release decade, and detailed mood tags to the current dataset, ensuring that everything is still formatted correctly and can be accessed the same way as before.
 
 **What did the agent generate or change?**
 
-<!-- List the files edited, code generated, or commands run -->
+Claude generated the dataset with the new features mentioned above for each of the 20 songs,it also included a new explicit feature which states whether a song is explicit or not by using 0 or 1. It suggested to edit the recommender.py to update what is loaded from the csv to include the updated features. 
 
 **What did you verify or fix manually?**
 
-<!-- Describe anything the agent got wrong or that required human review -->
-
+Claude did a great job at implementing the features but I still had to verify that everything was still accessible and works smoothly. 
 ---
 
 ## Design Pattern (SF10)

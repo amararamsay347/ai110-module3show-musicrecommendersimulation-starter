@@ -1,4 +1,5 @@
 from src.recommender import Song, UserProfile, Recommender
+from src.recommender import recommend_songs
 
 def make_small_recommender() -> Recommender:
     songs = [
@@ -59,3 +60,42 @@ def test_explain_recommendation_returns_non_empty_string():
     explanation = rec.explain_recommendation(user, song)
     assert isinstance(explanation, str)
     assert explanation.strip() != ""
+
+
+def _dict_song(song_id, artist, energy):
+    return {"id": song_id, "title": f"Song {song_id}", "artist": artist,
+            "genre": "pop", "mood": "happy", "energy": energy,
+            "valence": 0.5, "acousticness": 0.5, "danceability": 0.5}
+
+
+def _artist_rule_songs():
+    return [
+        _dict_song(1, "A", 0.8),
+        _dict_song(2, "A", 0.8),
+        _dict_song(3, "A", 0.8),
+        _dict_song(4, "B", 0.6),
+    ]
+
+
+def test_artist_gets_two_free_songs_then_penalty():
+    # genre_penalty=0 isolates the artist rule; A's third song scores
+    # 3.0 - 1.0 = 2.0, below B's 2.4, so B must take the third slot.
+    results = recommend_songs({"energy": 0.8}, _artist_rule_songs(), k=3,
+                              genre_penalty=0)
+    assert [s["artist"] for s, _, _ in results] == ["A", "A", "B"]
+    assert "artist repeat" not in results[1][2]
+
+
+def test_third_song_by_artist_shows_penalty_when_still_selected():
+    results = recommend_songs({"energy": 0.8}, _artist_rule_songs(), k=4,
+                              genre_penalty=0)
+    third_a = results[3]
+    assert third_a[0]["artist"] == "A"
+    assert "artist repeat" in third_a[2]
+    assert abs(third_a[1] - 2.0) < 1e-9
+
+
+def test_diversity_can_be_disabled():
+    results = recommend_songs({"energy": 0.8}, _artist_rule_songs(), k=3,
+                              diversity=False)
+    assert [s["artist"] for s, _, _ in results] == ["A", "A", "A"]
