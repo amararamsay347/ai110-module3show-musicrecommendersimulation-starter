@@ -13,6 +13,7 @@ from recommender import load_songs, recommend_songs
 
 
 def main() -> None:
+    """Load the songs, score them for a sample user, and print the top picks."""
     songs = load_songs("data/songs.csv") 
 
     # Starter example profile
@@ -20,14 +21,26 @@ def main() -> None:
 
     recommendations = recommend_songs(user_prefs, songs, k=5)
 
-    print("\nTop recommendations:\n")
-    for rec in recommendations:
-        # You decide the structure of each returned item.
-        # A common pattern is: (song, score, explanation)
-        song, score, explanation = rec
-        print(f"{song['title']} - Score: {score:.2f}")
-        print(f"Because: {explanation}")
-        print()
+    print_recommendations(user_prefs, recommendations)
+
+
+def print_recommendations(user_prefs: dict, recommendations: list, width: int = 60) -> None:
+    """Print each recommendation as a numbered card with its score and reasons."""
+    heavy, light = "=" * width, "-" * width
+    profile = ", ".join(f"{key}={value}" for key, value in user_prefs.items())
+
+    print(f"\n{heavy}")
+    print(f"TOP {len(recommendations)} RECOMMENDATIONS")
+    print(f"Profile: {profile}")
+    print(heavy)
+
+    for rank, (song, score, explanation) in enumerate(recommendations, start=1):
+        print(f"\n#{rank}  {song['title']} by {song['artist']}")
+        print(f"    Score: {score:.2f}   [{song['genre']} / {song['mood']}]")
+        print("    Reasons:")
+        for reason in explanation.split("; "):
+            print(f"      - {reason}")
+        print(light)
 
 
 if __name__ == "__main__":
