@@ -40,6 +40,7 @@ Energy is worth the most on purpose, mood is in the middle, and genre is a small
 ## 4. Data  
 
 The catalog is data/songs.csv: 20 songs, 17 genres and 16 moods. The starter file had 10 songs, and 10 more were added; none were removed. Each song has a genre, a mood, and numbers for energy, valence, danceability, acousticness and tempo (tempo is not scored). Limits: the catalog is tiny, most genres and moods appear only once, energy is bunched at the low and high ends, each song has just one genre and mood.
+
 ---
 
 ## 5. Strengths  
