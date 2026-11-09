@@ -11,17 +11,32 @@ You will implement the functions in recommender.py:
 
 from recommender import load_songs, recommend_songs
 
+# Test user profiles (preference dictionaries)
+PROFILES = {
+    "Starter Profile": {"genre": "pop", "mood": "happy", "energy": 0.8},
+    "High-Energy Pop": {
+        "genre": "pop", "mood": "happy", "energy": 0.85,
+        "valence": 0.85, "danceability": 0.85,
+    },
+    "Chill Lofi": {
+        "genre": "lofi", "mood": "focused", "energy": 0.38,
+        "acousticness": 0.75,
+    },
+    "Deep Intense Rock": {
+        "genre": "rock", "mood": "intense", "energy": 0.92,
+        "acousticness": 0.1,
+    },
+}
+
 
 def main() -> None:
     """Load the songs, score them for a sample user, and print the top picks."""
     songs = load_songs("data/songs.csv") 
 
-    # Starter example profile
-    user_prefs = {"genre": "pop", "mood": "happy", "energy": 0.8}
-
-    recommendations = recommend_songs(user_prefs, songs, k=5)
-
-    print_recommendations(user_prefs, recommendations)
+    for name, user_prefs in PROFILES.items():
+        print(f"\n##### {name} #####")
+        recommendations = recommend_songs(user_prefs, songs, k=5)
+        print_recommendations(user_prefs, recommendations)
 
 
 def print_recommendations(user_prefs: dict, recommendations: list, width: int = 60) -> None:

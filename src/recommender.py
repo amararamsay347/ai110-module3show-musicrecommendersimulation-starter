@@ -66,19 +66,24 @@ def load_songs(csv_path: str) -> List[Dict]:
 
 
 # ---------------------------------------------------------------------------
-# Scoring logic design (max 6.0 points)
+# Scoring logic design (max 6.75 points)
 #
-# Genre, mood and energy are weighted equally (1.5 each) so no single signal
-# dominates: a lone genre match ties with a lone mood match or perfect energy,
-# and matching two signals beats matching one. Valence, acousticness and
-# danceability (0.5 each) act as tiebreakers. Tempo is omitted because it is
-# largely redundant with energy.
+# Weight-shift experiment: energy is doubled (1.5 -> 3.0) and genre is halved
+# (1.5 -> 0.75) relative to the original equal-weight design. Energy is now the
+# dominant signal, mood sits in the middle, and genre is a smaller bonus.
+# Valence, acousticness and danceability (0.5 each) act as tiebreakers. Tempo
+# is omitted because it is largely redundant with energy.
+#
+# Max score = GENRE + MOOD + ENERGY + sum(NUMERIC) = 0.75 + 1.5 + 3.0 + 1.5
+#           = 6.75 (only reachable when every preference is supplied).
+# Original weights (genre 1.5, energy 1.5) gave a max of 6.0.
 # ---------------------------------------------------------------------------
-GENRE_POINTS = 1.5
+GENRE_POINTS = 0.75
 MOOD_POINTS = 1.5
 RELATED_MOOD_FACTOR = 0.5  # related mood earns half of MOOD_POINTS
-ENERGY_POINTS = 1.5
+ENERGY_POINTS = 3.0
 NUMERIC_POINTS = {"valence": 0.5, "acousticness": 0.5, "danceability": 0.5}
+MAX_SCORE = GENRE_POINTS + MOOD_POINTS + ENERGY_POINTS + sum(NUMERIC_POINTS.values())
 
 # Groups of moods that feel similar; a mood in the same group as the target
 # earns partial credit.
