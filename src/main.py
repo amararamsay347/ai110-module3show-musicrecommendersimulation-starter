@@ -10,6 +10,7 @@ You will implement the functions in recommender.py:
 """
 
 import argparse
+import textwrap
 
 from recommender import load_songs, recommend_songs, STRATEGIES, DEFAULT_MODE
 
@@ -58,23 +59,51 @@ def main() -> None:
             print_recommendations(user_prefs, recommendations)
 
 
-def print_recommendations(user_prefs: dict, recommendations: list, width: int = 60) -> None:
-    """Print each recommendation as a numbered card with its score and reasons."""
-    heavy, light = "=" * width, "-" * width
+def _wrap(text: str, width: int) -> list:
+    """Wrap text to `width` characters per line (always at least one line)."""
+    return textwrap.wrap(text, width=width) or [""]
+
+
+def format_table(headers: list, rows: list, widths: list) -> str:
+    """Render rows as an ASCII table. Each cell is a list of lines (multi-line
+    cells are padded); a rule is drawn between rows."""
+    rule = "+" + "+".join("-" * (w + 2) for w in widths) + "+"
+
+    def line(cells: list) -> list:
+        height = max(len(c) for c in cells)
+        out = []
+        for i in range(height):
+            parts = [(c[i] if i < len(c) else "").ljust(w) for c, w in zip(cells, widths)]
+            out.append("| " + " | ".join(parts) + " |")
+        return out
+
+    lines = [rule, *line([[h] for h in headers]), rule.replace("-", "=")]
+    for row in rows:
+        lines.extend(line(row))
+        lines.append(rule)
+    return "\n".join(lines)
+
+
+def print_recommendations(user_prefs: dict, recommendations: list) -> None:
+    """Print the top picks as an ASCII table: rank, song, genre/mood, score and
+    every reason behind the score (one reason per line)."""
     profile = ", ".join(f"{key}={value}" for key, value in user_prefs.items())
-
-    print(f"\n{heavy}")
-    print(f"TOP {len(recommendations)} RECOMMENDATIONS")
+    print(f"\nTOP {len(recommendations)} RECOMMENDATIONS")
     print(f"Profile: {profile}")
-    print(heavy)
 
+    widths = [2, 26, 16, 5, 62]
+    rows = []
     for rank, (song, score, explanation) in enumerate(recommendations, start=1):
-        print(f"\n#{rank}  {song['title']} by {song['artist']}")
-        print(f"    Score: {score:.2f}   [{song['genre']} / {song['mood']}]")
-        print("    Reasons:")
-        for reason in explanation.split("; "):
-            print(f"      - {reason}")
-        print(light)
+        reasons = [ln for r in explanation.split("; ") for ln in _wrap(f"- {r}", widths[4])]
+        rows.append([
+            [str(rank)],
+            _wrap(song["title"], widths[1]) + _wrap(f"by {song['artist']}", widths[1]),
+            [song["genre"], song["mood"]],
+            [f"{score:.2f}"],
+            reasons,
+        ])
+    print(format_table(["#", "Song", "Genre / Mood", "Score", "Why it scored this way"],
+                       rows, widths))
 
 
 if __name__ == "__main__":
