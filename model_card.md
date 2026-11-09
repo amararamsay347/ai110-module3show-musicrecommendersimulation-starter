@@ -1,21 +1,16 @@
 # 🎧 Model Card: Music Recommender Simulation
 
 ## 1. Model Name  
-
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
+**JamJammingJammerFinder-Music Recommender**  
 
 ---
 
 ## 2. Intended Use  
 
-Describe what your recommender is designed to do and who it is for. 
+This recommender suggests the top 5 songs from a 20-song catalog that best match a listener's favorite genre, mood and energy level, and it explains each pick. It assumes the listener's stated taste is accurate and fits a single energy level. It is for classroom exploration only, not for real listeners. 
 
-Prompts:  
-
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+### Non-Intended Use 
+This is not to be used for real music apps or real listeners, for decisions about artists or what gets promoted, or for people with mixed tastes. The reason given is that the 20-song catalog is too small and too subjective to give concrete solutions.
 
 ---
 
@@ -44,26 +39,14 @@ Energy is worth the most on purpose, mood is in the middle, and genre is a small
 
 ## 4. Data  
 
-Describe the dataset the model uses.  
-
-Prompts:  
-
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
-
+The catalog is data/songs.csv: 20 songs, 17 genres and 16 moods. The starter file had 10 songs, and 10 more were added; none were removed. Each song has a genre, a mood, and numbers for energy, valence, danceability, acousticness and tempo (tempo is not scored). Limits: the catalog is tiny, most genres and moods appear only once, energy is bunched at the low and high ends, each song has just one genre and mood.
 ---
 
 ## 5. Strengths  
 
 Where does your system seem to work well  
 
-Prompts:  
-
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
+It works best for listeners whose genre, mood and energy agree, like the pop, lofi and rock profiles, where the #1 song matched my expectations every time. The four profiles got clearly different lists, so the scoring really responds to what each listener asks for. Each pick comes with reasons that add up to its score, so it is easy to see why a song ranked where it did based on the user profile.
 
 ---
 
@@ -71,12 +54,6 @@ Prompts:
 
 Where the system struggles or behaves unfairly. 
 
-Prompts:  
-
-- Features it does not consider  
-- Genres or moods that are underrepresented  
-- Cases where the system overfits to one preference  
-- Ways the scoring might unintentionally favor some users  
 
 **Weakness discovered: a single energy target cannot represent listeners with mixed tastes.** Because a profile stores only one `energy` value and the score rewards closeness to it, a listener who enjoys both calm (about 0.2) and intense (about 0.9) music is effectively averaged to 0.55. In my test, that profile's top five were all mid-energy songs such as *Velvet Hours* (0.55) and *Dusty Porch Swing* (0.52), so neither of their real tastes was served, yet the system still reported a confident score of 3.00. The same weakness shows up for any user whose labels fail to match, since mid-energy songs become the default fallback for everyone. Doubling the energy weight in my weight-shift experiment made this worse, because energy now outweighs genre and mood combined.
 
@@ -86,14 +63,6 @@ Prompts:
 
 How you checked whether the recommender behaved as expected. 
 
-Prompts:  
-
-- Which user profiles you tested  
-- What you looked for in the recommendations  
-- What surprised you  
-- Any simple tests or comparisons you ran  
-
-No need for numeric metrics unless you created some.
 
 **User profiles tested.** Four profiles are built into `src/main.py`, and their top-5 output is in the README:
 
@@ -132,12 +101,9 @@ I also ran edge-case profiles in separate scripts, without adding them to the pr
 
 Ideas for how you would improve the model next.  
 
-Prompts:  
-
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
+a. Allow more than one energy target per listener.
+b. Limit repeat artists and genres in the top 5.
+c. Add more songs and reject invalid inputs.
 
 ---
 
@@ -145,8 +111,12 @@ Prompts:
 
 A few sentences about your experience.  
 
-Prompts:  
+I learned that every recommender system has its own way of choosing what to show. Spotify mixes collaborative filtering, content-based and audio analysis, context and sequence signals, and reinforcement learning. YouTube first picks a set of candidate videos and then ranks them, and TikTok relies on key signals and video features. All of them learn from explicit feedback (thumbs up or down, follows, playlists) and implicit feedback (skips, replays, completion rate, likes, saves, shares, searches). Something unexpected was how much a small change in weights could shift the results: doubling energy and halving genre changed the rankings more than I thought it would. Before, I saw recommendation apps as basic algorithms. Now I see them as complex machine learning models trained on huge amounts of listener behavior, built to match what people want with high accuracy.
+                                                                                   
+My recommender was much simpler. It adds up points for genre, mood and energy and  ranks the songs by the total. Even so, small design choices changed the results. When I gave energy more weight and genre less, the order of the songs below the tpick changed, and I thought the new order fit the listener better.   
 
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+AI tools helped me build and test the system quickly, but I still verified the results myself, including checking that the scores added up and that the documentation matched the code and that the logic followed exactly how I intended it to be.
+
+What surprised me most was that such a simple system could still feel like a real recommendation. A listener who asked for happy pop got a song they might actually play, along with the reasons it was chosen.
+
+If I continued this project, I would let a listener have more than one energy preference, limit how often the same artist appears in the top five, and use feedback such as skips and replays to improve the results.
